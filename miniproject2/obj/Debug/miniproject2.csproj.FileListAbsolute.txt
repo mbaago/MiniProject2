@@ -1,0 +1,6 @@
+C:\Users\Morten\git\miniproject2\miniproject2\bin\Debug\miniproject2.exe.config
+C:\Users\Morten\git\miniproject2\miniproject2\obj\Debug\miniproject2.csprojResolveAssemblyReference.cache
+C:\Users\Morten\git\miniproject2\miniproject2\bin\Debug\miniproject2.exe
+C:\Users\Morten\git\miniproject2\miniproject2\bin\Debug\miniproject2.pdb
+C:\Users\Morten\git\miniproject2\miniproject2\obj\Debug\miniproject2.exe
+C:\Users\Morten\git\miniproject2\miniproject2\obj\Debug\miniproject2.pdb

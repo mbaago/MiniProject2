@@ -156,3 +156,8 @@ $RECYCLE.BIN/
 .DS_Store
 
 SentimentTrainingData.txt
+Report/*.aux
+Report/*.pdf
+Report/*.gz
+Report/*.txss
+Report/*.out

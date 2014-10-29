@@ -76,13 +76,46 @@ namespace miniproject2
             RegexTokenizer = new Regex(regString, RegexOptions.Compiled | RegexOptions.IgnoreCase);
         }
 
+
+        private static Regex PunctuationRegex = new Regex("^[.:;!?]$", RegexOptions.Compiled);
+        private static Regex NegationRegex = new Regex("(?:^(?:never|no|nothing|nowhere|noone|none|not|havent|hasnt|hadnt|cant|couldnt|shouldnt|wont|wouldnt|dont|doesnt|didnt|isnt|arent|aint)$)|n't", RegexOptions.Compiled);
+
         public static IEnumerable<string> Tokenize(string s)
         {
             var matchList = RegexTokenizer.Matches(s);
             var matches = matchList.Cast<Match>()
                 .Select(m => m.Value);
             var lowered = matches
-                .Select(m => EmoRegex.IsMatch(m) ? m : m.ToLower());
+                .Select(m => EmoRegex.IsMatch(m) ? m : m.ToLower()).ToArray();
+
+            bool neg = false;
+            for (int i = 0; i < lowered.Length; i++)
+            {
+                if (neg)
+                {
+                    if (PunctuationRegex.IsMatch(lowered[i]))
+                    {
+                        neg = false;
+                    }
+                    else
+                    {
+                        lowered[i] = lowered[i] + "_NEG";
+                    }
+                }
+                else
+                {
+                    if (NegationRegex.IsMatch(lowered[i]))
+                    {
+                        neg = true;
+                    }
+                }
+            }
+
+            foreach (var token in lowered)
+            {
+                // punct - neg=false
+                // neg - neg=true
+            }
 
             return lowered;
         }

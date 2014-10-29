@@ -155,7 +155,9 @@ $RECYCLE.BIN/
 # Mac desktop service store files
 .DS_Store
 
+friendships.txt
 SentimentTrainingData.txt
+
 Report/*.aux
 Report/*.pdf
 Report/*.gz

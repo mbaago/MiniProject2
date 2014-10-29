@@ -26,7 +26,14 @@ namespace miniproject2
             //    Console.ReadKey();
             //}
 
-            dynamic var = txtParser.Instance.parseReview("SentimentTrainingData.txt", 5);
+            dynamic list = txtParser.Instance.parseReview("SentimentTrainingData.txt", 1000);
+            Classifier c = new Classifier();
+
+            var result = c.clasify(list);
+
+            foreach (var item in result)
+            {
+            }
             Console.ReadKey();
         }
     }

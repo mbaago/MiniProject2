@@ -34,9 +34,23 @@ namespace miniproject2
 
         }
 
-        private IEnumerable<Person> Neighbours(Person p1)
+        public IEnumerable<int> Neighbours(string personName)
         {
-            throw new NotImplementedException();
+            return Neighbours(PersonNameIndex[personName]);
+        }
+        public IEnumerable<int> Neighbours(int personIndex)
+        {
+            List<int> friends = new List<int>();
+
+            for (int i = 0; i < PersonNameIndex.Count; i++)
+            {
+                if (GraphArray[personIndex, i] == true)
+                {
+                    friends.Add(i);
+                }
+            }
+
+            return friends;
         }
 
         private void LoadNamesToIndex()

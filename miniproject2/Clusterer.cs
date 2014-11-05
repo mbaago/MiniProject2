@@ -18,6 +18,11 @@ namespace miniproject2
             return capSize / cupSize;
         }
 
+        private IEnumerable<Person> Neighbours(Person p1)
+        {
+            throw new NotImplementedException();
+        }
+
 
     }
 }

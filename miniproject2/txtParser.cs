@@ -63,54 +63,55 @@ namespace miniproject2
 
             int n = count;
             int i = 0;
-            string[] delimiter = new string[] { "review/" };
+            string[] delimiter = new string[] { ":" };
 
             List<Review> reviews = new List<Review>();
             while (!reader.EndOfStream && ((n == 0) || (i < n)))
             {
-                string product = parseToNewLine(reader);
+                List<string> lines = parseToNewLine(reader);
                 //Console.WriteLine(product);
-                
-                string[] lines = product.Split(delimiter, StringSplitOptions.None);
+
+                //string[] lines = product.Split(delimiter, StringSplitOptions.None);
                 Review review = new Review();
-                
 
-                foreach (string l in lines)
+
+                for (int z = 0; z < lines.Count(); z++)
                 {
-                    string firstWord = l.Substring(0, l.IndexOf(" "));
-                    switch (firstWord)
+                    string line = trimString(lines[z].Substring(lines[z].IndexOf(": ")+ 1));
+                    //string firstWord = l.Substring(0, l.IndexOf(" "));
+                    switch (z)
                     {
-                        case "product/productId:":
-                            review.productID = trimString(l.Substring(l.IndexOf(" ")));
+                        case 0:
+                            review.productID = line;
                             break;
-                        case "userId:":
-                            review.userID = trimString(l.Substring(l.IndexOf(" ")));
+                        case 1:
+                            review.userID = line;
                             break;
-                        case "profileName:":
-                            review.profileName = trimString(l.Substring(l.IndexOf(" ")));
+                        case 2:
+                            review.profileName = line;
                             break;
-                        case "helpfulness:":
-                            string[] s = Regex.Replace(l, @"\s+", "").Substring(l.IndexOf(" ")).Split('/');
-
-                            review.helpfulness = new Tuple<int,int>(Convert.ToInt32(s[0].Trim()), Convert.ToInt32(s[1].Trim()));
+                        case 3:
+                            //string[] s = Regex.Replace(lines[z], @"\s+", "").Substring(lines[z].IndexOf(":")).Split('/');
+                            string[] s = line.Split('/');
+                            review.helpfulness = new Tuple<int, int>(Convert.ToInt32(s[0].Trim()), Convert.ToInt32(s[1].Trim()));
                             break;
-                        case "score:":
-                            review.score = double.Parse(l.Substring(l.IndexOf(" ")), CultureInfo.InvariantCulture);
+                        case 4:
+                            review.score = double.Parse((line), CultureInfo.InvariantCulture);
                             break;
-                        case "time:":
+                        case 5:
                             DateTime time = new DateTime(1970, 1, 1, 0, 0, 0);
-                            review.time = time.AddSeconds(Convert.ToDouble(l.Substring(l.IndexOf(" "))));
+                            review.time = time.AddSeconds(Convert.ToDouble(line));
                             break;
-                        case "summary:":
-                            review.summary = trimString(l.Substring(l.IndexOf(" ")));
+                        case 6:
+                            review.summary = trimString(line);
                             break;
-                        case "text:":
-                            review.review = trimString(l.Substring(l.IndexOf(" ")));
+                        case 7:
+                            review.review = trimString(line);
                             break;
                         default:
                             break;
                     }
-                    
+
 
                 }
                 reviews.Add(review);
@@ -123,21 +124,21 @@ namespace miniproject2
 
         private string trimString(string s)
         {
-            char[] trimChars = {'\r','\n', '\t', ' '};
+            char[] trimChars = { '\r', '\n', '\t', ' ' };
             return s.Trim(trimChars);
         }
 
 
-        private string parseToNewLine(StreamReader reader)
+        private List<string> parseToNewLine(StreamReader reader)
         {
             bool found = false;
             string line = "";
-            StringBuilder sb = new StringBuilder();
+            List<string> result = new List<string>();
             while (!found && !reader.EndOfStream)
             {
                 if (!String.IsNullOrEmpty(line = reader.ReadLine()))
                 {
-                    sb.AppendLine(line);
+                    result.Add(line);
                 }
                 else
                 {
@@ -145,7 +146,7 @@ namespace miniproject2
                 }
             }
 
-            return sb.ToString();
+            return result;
         }
     }
 }

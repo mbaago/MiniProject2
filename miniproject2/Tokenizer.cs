@@ -117,7 +117,7 @@ namespace miniproject2
                 // neg - neg=true
             }
 
-            return lowered;
+            return lowered.Distinct().ToArray();
         }
     }
 }

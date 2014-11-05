@@ -21,5 +21,10 @@ namespace miniproject2
             friends = new List<string>();
         }
 
+
+        public override string ToString()
+        {
+            return name;
+        }
     }
 }

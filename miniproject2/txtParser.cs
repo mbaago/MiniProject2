@@ -44,9 +44,9 @@ namespace miniproject2
 
         private Person parsePerson(string[] person)
         {
-            Person p = new Person((person[0].Split())[1]);
+            Person p = new Person((person[0].Split(new char[] { ' ' }, 2))[1]);
 
-            string[] friends = person[1].Split();
+            string[] friends = person[1].Split(new char[] { '\t' });
 
             for (int i = 1; i < friends.Length; i++)
             {
@@ -70,10 +70,10 @@ namespace miniproject2
             {
                 string product = parseToNewLine(reader);
                 //Console.WriteLine(product);
-                
+
                 string[] lines = product.Split(delimiter, StringSplitOptions.None);
                 Review review = new Review();
-                
+
 
                 foreach (string l in lines)
                 {
@@ -92,7 +92,7 @@ namespace miniproject2
                         case "helpfulness:":
                             string[] s = Regex.Replace(l, @"\s+", "").Substring(l.IndexOf(" ")).Split('/');
 
-                            review.helpfulness = new Tuple<int,int>(Convert.ToInt32(s[0].Trim()), Convert.ToInt32(s[1].Trim()));
+                            review.helpfulness = new Tuple<int, int>(Convert.ToInt32(s[0].Trim()), Convert.ToInt32(s[1].Trim()));
                             break;
                         case "score:":
                             review.score = double.Parse(l.Substring(l.IndexOf(" ")), CultureInfo.InvariantCulture);
@@ -110,7 +110,7 @@ namespace miniproject2
                         default:
                             break;
                     }
-                    
+
 
                 }
                 reviews.Add(review);
@@ -123,7 +123,7 @@ namespace miniproject2
 
         private string trimString(string s)
         {
-            char[] trimChars = {'\r','\n', '\t', ' '};
+            char[] trimChars = { '\r', '\n', '\t', ' ' };
             return s.Trim(trimChars);
         }
 

@@ -8,30 +8,40 @@ namespace miniproject2
 {
     class Classifier
     {
-        private Dictionary<string, int> goodWords { get; set; }
-        private Dictionary<string, int> badWords { get; set; }
+        private Dictionary<string, double> goodWords { get; set; }
+        private Dictionary<string, double> badWords { get; set; }
         public Dictionary<string, Tuple<double, double>> wordProbability { get; set; }
 
         public int positiveReviews { get; set; }
         public int negativeReviews { get; set; }
+        public double propGood { get; set; }
+        public double propNeg{ get; set; }
 
+        public Classifier()
+        {
+            goodWords = new Dictionary<string, double>();
+            badWords = new Dictionary<string, double>();
+            wordProbability = new Dictionary<string, Tuple<double, double>>();
+
+        }
 
 
 
         public Dictionary<string, Tuple<double, bool>> clasify(List<Review> list)
         {
-            var learnList = list.Take(list.Count / 10);
-            var testList = list.Skip(list.Count / 10).Take(list.Count / 20);
+            var testList = list.Take(list.Count / 10);
+            var learnList = list.Skip(list.Count / 10);
+            
 
             calculateWordProbability(learnList.ToList());
 
             
 
-            return rateReviews(testList.ToList());
+            return rateReviews(testList.ToList(), learnList.Count());
         }
 
 
-        private void addWordsToDictionary(string s, Dictionary<string, int> dict)
+        private void addWordsToDictionary(string s, Dictionary<string, double> dict)
         {
             foreach (string item in Tokenizer.Tokenize(s))
             {
@@ -70,31 +80,50 @@ namespace miniproject2
 
             foreach (var item in goodWords)
             {
-                wordProbability.Add(item.Key, new Tuple<double, double>((item.Value / list.Count), 0));
+                wordProbability.Add(item.Key, new Tuple<double, double>(maxValue(1,(item.Value / list.Count)), 0));
             }
             foreach (var item in badWords)
             {
                 if (wordProbability.ContainsKey(item.Key))
                 {
                     double posValue = wordProbability[item.Key].Item1;
-                    wordProbability[item.Key] = new Tuple<double, double>(posValue, (item.Value / list.Count));
+                    wordProbability[item.Key] = new Tuple<double, double>(posValue,  maxValue(1,(item.Value / list.Count)));
                 }
             }
+            var temp = new Dictionary<string, Tuple<double, double>>();
+            //foreach (var item in wordProbability)
+            //{
+            //    double posValues = Math.Log10(positiveReviews) + item.Value.Item1;
+            //    double negVAlue = Math.Log10(negativeReviews) + item.Value.Item2;
+            //    temp[item.Key] = new Tuple<double, double>(posValues, negVAlue);
+            //}
+
+            //wordProbability = temp;
+        }
+
+        private double maxValue(int p1, double p2)
+        {
+            if (p2 > p1)
+            {
+                return 1;
+            }
+            return p2;
         }
 
 
-        private Dictionary<string, Tuple<double, bool>> rateReviews(List<Review> list)
+        private Dictionary<string, Tuple<double, bool>> rateReviews(List<Review> list, int total)
         {
-            double emptyGood = calculateGoodEmpty(list.Count);
-            double emptyBad = calculateBadEmpty(list.Count);
+            double emptyGood = calculateGoodEmpty(list.Count, total);
+            double emptyBad = calculateBadEmpty(list.Count, total);
+            var result = new Dictionary<string, Tuple<double, bool>>();
 
             foreach (var item in list)
             {
-                reteReview(item, emptyGood, emptyBad);
+                result[item.productID + item.userID] = new Tuple<double,bool>(item.score, reteReview(item, emptyGood, emptyBad));
             }
 
 
-            return null;
+            return result;
         }
 
         private bool reteReview(Review item, double emptyGood, double emptyBad)
@@ -103,8 +132,13 @@ namespace miniproject2
             double propBad = 1;
             foreach (var s in Tokenizer.Tokenize(item.review))
             {
-                propGood *= (wordProbability[s].Item1 / (1 - wordProbability[s].Item1));
-                propBad *= (wordProbability[s].Item2 / (1 - wordProbability[s].Item2));
+                if (wordProbability.ContainsKey(s))
+                {
+                    double t = (wordProbability[s].Item1 / (1 - wordProbability[s].Item1));
+                    propGood *= t;
+                    propBad *= (wordProbability[s].Item2 / (1 - wordProbability[s].Item2));
+                }
+                
             }
 
             propGood *= emptyGood;
@@ -114,24 +148,25 @@ namespace miniproject2
 
         }
 
-        private double calculateGoodEmpty(int total)
+        private double calculateGoodEmpty(int good, int total)
         {
             double result = 1;
             foreach (var item in wordProbability)
             {
-                result = result * item.Value.Item1;
+                result = result * (1 - item.Value.Item1);
             }
-            return result * (positiveReviews/total);
+            result *= ((double)good/total);
+            return result;
         }
 
-        private double calculateBadEmpty(int total)
+        private double calculateBadEmpty(int neg, int total)
         {
             double result = 1;
             foreach (var item in wordProbability)
             {
-                result = result * item.Value.Item2;
+                result = result * (1 - item.Value.Item2);
             }
-            return result * (negativeReviews / total);
+            return result * ((double)neg / total);
         }
 
 

@@ -10,22 +10,15 @@ namespace miniproject2
     {
         static void Main(string[] args)
         {
-            //List<Person> persons = txtParser.Instance.parseTxt("friendships.txt");
 
+            Clusterer cl = new Clusterer();
+            cl.cluster();
+            //runClasifier();
+        }
 
-            //foreach (Person p in persons)
-            //{
-            //    Console.WriteLine("***********************************************");
-            //    Console.WriteLine("Username: " + p.name);
-            //    Console.WriteLine("Friends");
-            //    foreach (string s in p.friends)
-            //    {
-            //        Console.WriteLine(s);
-            //    }
-            //    Console.WriteLine("***********************************************");
-            //    Console.ReadKey();
-            //}
-            DateTime start = DateTime.Now;           
+        private static void runClasifier()
+        {
+            DateTime start = DateTime.Now;
             var list = txtParser.Instance.parseReview("SentimentTrainingData.txt", 0);
             Classifier c = new Classifier();
 
@@ -41,11 +34,11 @@ namespace miniproject2
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     if (item.Value.Item2)
                     {
-                         review = "Good review";
+                        review = "Good review";
                     }
                     else
                     {
-                         review = "Bad review";
+                        review = "Bad review";
                     }
                     neutral++;
 
@@ -62,18 +55,18 @@ namespace miniproject2
                     review = "Bad review";
                     correct++;
                 }
-                
+
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     if (item.Value.Item2)
                     {
-                         review = "Good review";
+                        review = "Good review";
                     }
                     else
                     {
-                         review = "Bad review";
-                    } 
+                        review = "Bad review";
+                    }
 
                 }
                 Console.WriteLine(item.Key + " Score" + item.Value.Item1 + review);
@@ -81,7 +74,7 @@ namespace miniproject2
             Console.WriteLine("*********************************************");
             Console.WriteLine("Started: " + start.ToString());
             Console.WriteLine("Finished: " + DateTime.Now.ToString());
-            Console.WriteLine("Correctness: " + ((double)correct/(result.Count - neutral)) * 100 + "%");
+            Console.WriteLine("Correctness: " + ((double)correct / (result.Count - neutral)) * 100 + "%");
             Console.WriteLine("*********************************************");
             Console.ReadKey();
         }

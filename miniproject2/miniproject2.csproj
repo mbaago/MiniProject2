@@ -56,6 +56,16 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Downloads\Dijkstra\Dijkstra\Dijkstra.csproj">
+      <Project>{307ec6fd-8439-4b57-9b56-2d3a0296d356}</Project>
+      <Name>Dijkstra</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Downloads\TextClustering\TextClustering\TextClustering.csproj">
+      <Project>{43228dd5-3a5d-43d0-8481-ec311903972f}</Project>
+      <Name>TextClustering</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

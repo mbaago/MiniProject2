@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TextClustering.Lib;
 
 namespace miniproject2
 {
@@ -80,6 +81,28 @@ namespace miniproject2
                     GraphArray[index, friendIndex] = 1;
                 }
             }
+        }
+
+        public void cluster()
+        {
+            LoadGraphArray("../../../friendships.reviews.txt");
+            List<DocumentVector> vecs = new List<DocumentVector>();
+            int totalIt = 0;
+            foreach (var p in People)
+            {
+                DocumentVector d = new DocumentVector();
+                d.Content = p.name;
+                d.VectorSpace = new float[p.friends.Count];
+                for (int i = 0; i < p.friends.Count; i++)
+                {
+                    d.VectorSpace[i] = PersonNameIndex[p.friends[i]];
+                }
+                vecs.Add(d);
+            }
+
+            var result = DocumnetClustering.PrepareDocumentCluster(7, vecs, ref totalIt);
+
+            string s;
         }
     }
 }

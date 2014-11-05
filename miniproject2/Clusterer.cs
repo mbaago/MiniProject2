@@ -16,7 +16,7 @@ namespace miniproject2
 
         private List<Person> People { get; set; }
         private Dictionary<string, int> PersonNameIndex { get; set; }
-        public bool[,] GraphArray { get; private set; }
+        public double[,] GraphArray { get; private set; }
 
         private double Jaccard(IEnumerable<Person> p1, IEnumerable<Person> p2)
         {
@@ -44,7 +44,7 @@ namespace miniproject2
 
             for (int i = 0; i < PersonNameIndex.Count; i++)
             {
-                if (GraphArray[personIndex, i] == true)
+                if (GraphArray[personIndex, i] > 0)
                 {
                     friends.Add(i);
                 }
@@ -67,7 +67,7 @@ namespace miniproject2
             LoadPeople(fileName);
             LoadNamesToIndex();
 
-            GraphArray = new bool[PersonNameIndex.Count, PersonNameIndex.Count];
+            GraphArray = new double[PersonNameIndex.Count, PersonNameIndex.Count];
 
             foreach (var person in People)
             {
@@ -77,7 +77,7 @@ namespace miniproject2
                 {
                     var friendIndex = PersonNameIndex[friend];
 
-                    GraphArray[index, friendIndex] = true;
+                    GraphArray[index, friendIndex] = 1;
                 }
             }
         }

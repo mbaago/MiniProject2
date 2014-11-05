@@ -29,15 +29,25 @@ namespace miniproject2
 
         public Dictionary<string, Tuple<double, bool>> clasify(List<Review> list)
         {
-            var testList = list.Take(list.Count / 10);
-            var learnList = list.Skip(list.Count / 10);
+            int tenth = list.Count / 10;
+            List<Dictionary<string, Tuple<double, bool>>> result = new List<Dictionary<string,Tuple<double,bool>>>();
             
 
-            calculateWordProbability(learnList.ToList());
+            for (int i = 0; i < 10; i++)
+            {
+                var firstLearnList = list.Take(i * tenth);
+                var testList = list.Skip(i * tenth).Take(tenth);
+                var learnList = list.Skip(tenth * (i + 1));
 
-            
+                calculateWordProbability(learnList.ToList());
 
-            return rateReviews(testList.ToList(), learnList.Count());
+
+
+                return rateReviews(testList.ToList(), learnList.Count());
+            }
+
+            return null;
+           
         }
 
 

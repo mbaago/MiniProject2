@@ -1,6 +1,28 @@
 \section{Sentiment analysis}
 
 \subsection{Steps in constructing a sentiment classifier}
+The overall structure in a sentiment classifier is:
+\begin{enumerate}
+    \item Tokenization.
+    \item Feature extraction.
+    \item Classification, using e.g. Naïve Bayes.
+\end{enumerate}
+%
+When classifying a review, several problems arise, such as:
+\begin{itemize}
+    \item Markup (e.g. bold text)
+    \item Capitalization, indicating shouting/a stronger opinion.
+    \item Dates, addresses, ...
+    \item Emoticons, adding to a positive/negative value.
+    \item Masked swearing, e.g. ****, f**k, \@\#!\%, ...
+    \item Lengthening of words such as really: reaaaaaally.
+    \item Negations, especially when early in a sentence.
+\end{itemize}
+
+To handle this, we use Potts's sentiment aware tokenizer: \url{http://sentiment.christopherpotts.net/code-data/happyfuntokenizing.py}. Negations are handled by adding \texttt{\_NEG} to all words following the negations, until the first clause-level punctuation mark.
+
+
+
 % what did we do
 % corner cutting
 

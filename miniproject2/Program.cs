@@ -11,9 +11,13 @@ namespace miniproject2
         static void Main(string[] args)
         {
 
-            Clusterer cl = new Clusterer();
-            cl.cluster();
-            //runClasifier();
+            Clusterer cl = new Clusterer(@"../../../friendships.reviews.txt");
+
+            var clusters = cl.DoClustering(2);
+
+            Console.WriteLine(clusters);
+
+            Console.ReadKey();
         }
 
         private static void runClasifier()

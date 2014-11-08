@@ -3,21 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TextClustering.Lib;
 
 namespace miniproject2
 {
     public class Clusterer
     {
-        public Clusterer()
+        public Clusterer(string fileName)
         {
             PersonNameIndex = new Dictionary<string, int>();
             People = new List<Person>();
+
+            LoadPeople(fileName);
+            LoadNamesToIndex();
+            LoadGraphArray();
         }
 
         private List<Person> People { get; set; }
         private Dictionary<string, int> PersonNameIndex { get; set; }
         public double[,] GraphArray { get; private set; }
+        public bool[,] BoolGraphArray { get; private set; }
 
         private double Jaccard(IEnumerable<Person> p1, IEnumerable<Person> p2)
         {
@@ -45,7 +49,7 @@ namespace miniproject2
 
             for (int i = 0; i < PersonNameIndex.Count; i++)
             {
-                if (GraphArray[personIndex, i] > 0)
+                if (BoolGraphArray[personIndex, i])
                 {
                     friends.Add(i);
                 }
@@ -63,12 +67,10 @@ namespace miniproject2
             }
         }
 
-        public void LoadGraphArray(string fileName)
+        private void LoadGraphArray()
         {
-            LoadPeople(fileName);
-            LoadNamesToIndex();
-
-            GraphArray = new double[PersonNameIndex.Count, PersonNameIndex.Count];
+            //GraphArray = new double[PersonNameIndex.Count, PersonNameIndex.Count];
+            BoolGraphArray = new bool[PersonNameIndex.Count, PersonNameIndex.Count];
 
             foreach (var person in People)
             {
@@ -78,31 +80,128 @@ namespace miniproject2
                 {
                     var friendIndex = PersonNameIndex[friend];
 
-                    GraphArray[index, friendIndex] = 1;
+                    //GraphArray[index, friendIndex] = 1;
+                    BoolGraphArray[index, friendIndex] = true;
+                    BoolGraphArray[friendIndex, index] = true;
                 }
             }
         }
 
-        public void cluster()
+        public List<List<int>> DoClustering(int k)
         {
-            LoadGraphArray("../../../friendships.reviews.txt");
-            List<DocumentVector> vecs = new List<DocumentVector>();
-            int totalIt = 0;
-            foreach (var p in People)
+            // find all cliques (relaxed?) of size k
+
+            var cliquesOfSize = CalculateCliques();
+            var adjacents = CliquePercolationMethod(cliquesOfSize, k);
+
+
+            //StringBuilder sb = new StringBuilder();
+            //foreach (var item in cliquesOfSize.OrderBy(t => t.Count))
+            //{
+            //    sb.Append("," + item.Count());
+            //}
+
+            //Console.WriteLine(sb.ToString());
+
+            return adjacents;
+        }
+
+        private List<List<int>> CliquePercolationMethod(List<List<int>> cliques, int k)
+        {
+            List<List<int>> adjacentCliques = new List<List<int>>();
+
+            for (int i = 0; i < PersonNameIndex.Count; i++)
             {
-                DocumentVector d = new DocumentVector();
-                d.Content = p.name;
-                d.VectorSpace = new float[p.friends.Count];
-                for (int i = 0; i < p.friends.Count; i++)
+                var thisClique = cliques[i];
+                var adjacent = new List<int>(thisClique);
+
+                for (int j = i + 1; j < PersonNameIndex.Count; j++)
                 {
-                    d.VectorSpace[i] = PersonNameIndex[p.friends[i]];
+                    var nextClicque = cliques[j];
+
+                    if (thisClique.Intersect(nextClicque).Count() > (k - 1))
+                    {
+                        adjacent.AddRange(nextClicque);
+                    }
                 }
-                vecs.Add(d);
+
+                adjacentCliques.Add(new List<int>(adjacent.Distinct()));
             }
 
-            var result = DocumnetClustering.PrepareDocumentCluster(7, vecs, ref totalIt);
-
-            string s;
+            return adjacentCliques;
         }
+
+        private List<List<int>> CalculateCliques()
+        {
+            List<List<int>> cliques = new List<List<int>>();
+
+            for (int v = 0; v < PersonNameIndex.Count; v++)
+            {
+                var clique = new List<int>();
+                clique.Add(v);
+
+                var toBetried = new Stack<int>();
+                foreach (var u in Neighbours(v))
+                {
+                    toBetried.Push(u);
+                }
+
+
+                while (toBetried.Count > 0)
+                {
+                    var next = toBetried.Pop();
+
+                    if (IsNeighbourWithAll(clique, next))
+                    {
+                        foreach (var neighbour in Neighbours(next))
+                        {
+                            toBetried.Push(neighbour);
+                        }
+                        clique.Add(next);
+                    }
+                }
+
+                cliques.Add(clique);
+            }
+
+            return cliques;
+        }
+
+        private bool IsNeighbourWithAll(IEnumerable<int> all, int v)
+        {
+            var neighbours = Neighbours(v);
+
+            foreach (var u in all)
+            {
+                if (!neighbours.Contains(u))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        //public void cluster()
+        //{
+        //    LoadGraphArray("../../../friendships.reviews.txt");
+        //    List<DocumentVector> vecs = new List<DocumentVector>();
+        //    int totalIt = 0;
+        //    foreach (var p in People)
+        //    {
+        //        DocumentVector d = new DocumentVector();
+        //        d.Content = p.name;
+        //        d.VectorSpace = new float[p.friends.Count];
+        //        for (int i = 0; i < p.friends.Count; i++)
+        //        {
+        //            d.VectorSpace[i] = PersonNameIndex[p.friends[i]];
+        //        }
+        //        vecs.Add(d);
+        //    }
+
+        //    var result = DocumnetClustering.PrepareDocumentCluster(7, vecs, ref totalIt);
+
+        //    string s;
+        //}
     }
 }

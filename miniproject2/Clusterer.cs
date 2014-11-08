@@ -24,7 +24,7 @@ namespace miniproject2
         private Dictionary<string, int> PersonNameIndex { get; set; }
         public double[,] GraphArray { get; private set; }
         public bool[,] BoolGraphArray { get; private set; }
-        private Dictionary<int, List<int>> NeighBours { get; set; }
+        public Dictionary<int, List<int>> NeighBours { get; set; }
 
         private double Jaccard(IEnumerable<Person> p1, IEnumerable<Person> p2)
         {
@@ -102,7 +102,7 @@ namespace miniproject2
             // Use CPM
             // Little different from slides
             // We use another value of k for the clique graph
-            var CPM = CliquePercolationMethod(cliquesOfSize, cpm);
+            var CPM = CliquePercolationMethod(cliquesOfSize, k);
 
             return CPM;
         }
@@ -138,8 +138,7 @@ namespace miniproject2
                 communities.Add(thing.ToList());
             }
 
-            int t = adjacentCliques.Sum(x => x.Count);
-
+            // one person might be shared in communites
             return communities;
         }
 

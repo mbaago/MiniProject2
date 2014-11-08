@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Classifier.cs" />
     <Compile Include="Clusterer.cs" />
+    <Compile Include="DetermineIfLikelyToBuy.cs" />
     <Compile Include="Person.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

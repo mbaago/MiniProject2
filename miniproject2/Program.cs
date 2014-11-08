@@ -13,7 +13,7 @@ namespace miniproject2
 
             Clusterer cl = new Clusterer(@"../../../friendships.reviews.txt");
 
-            var clusters = cl.DoClustering(2);
+            var clusters = cl.DoClustering(2, 2);
 
             Console.WriteLine(clusters);
 

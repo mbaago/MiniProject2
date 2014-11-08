@@ -42,25 +42,25 @@ namespace miniproject2
 
         }
 
-        public IEnumerable<int> Neighbours(string personName)
-        {
-            return Neighbours(PersonNameIndex[personName]);
-        }
-        public IEnumerable<int> Neighbours(int personIndex)
-        {
-            //List<int> friends = new List<int>();
+        //public IEnumerable<int> Neighbours(string personName)
+        //{
+        //    return Neighbours(PersonNameIndex[personName]);
+        //}
+        //public IEnumerable<int> Neighbours(int personIndex)
+        //{
+        //    //List<int> friends = new List<int>();
 
-            //for (int i = 0; i < PersonNameIndex.Count; i++)
-            //{
-            //    if (BoolGraphArray[personIndex, i])
-            //    {
-            //        friends.Add(i);
-            //    }
-            //}
+        //    //for (int i = 0; i < PersonNameIndex.Count; i++)
+        //    //{
+        //    //    if (BoolGraphArray[personIndex, i])
+        //    //    {
+        //    //        friends.Add(i);
+        //    //    }
+        //    //}
 
-            //return friends;
-            return NeighBours[personIndex];
-        }
+        //    //return friends;
+        //    return NeighBours[personIndex];
+        //}
 
         private void LoadNamesToIndex()
         {
@@ -94,81 +94,93 @@ namespace miniproject2
 
         }
 
-        public List<List<int>> DoClustering(int kcliqueness, int k)
+        public List<List<int>> DoClustering(int k, int cpm)
         {
-            // find all cliques (relaxed?) of size k
+            // Find all k-plexes
+            var cliquesOfSize = CalculateClustersOrReadFromFile(k);
 
-            var cliquesOfSize = CalculateQliquesV2(kcliqueness);
-            var adjacents = CliquePercolationMethod(cliquesOfSize, k);
+            // Use CPM
+            // Little different from slides
+            // We use another value of k for the clique graph
+            var CPM = CliquePercolationMethod(cliquesOfSize, cpm);
 
-
-            //StringBuilder sb = new StringBuilder();
-            //foreach (var item in cliquesOfSize.OrderBy(t => t.Count))
-            //{
-            //    sb.Append("," + item.Count());
-            //}
-
-            //Console.WriteLine(sb.ToString());
-
-            return adjacents;
+            return CPM;
         }
+
 
         private List<List<int>> CliquePercolationMethod(List<List<int>> cliques, int k)
         {
-            List<List<int>> adjacentCliques = new List<List<int>>();
+            var adjacentCliques = new List<List<List<int>>>();
 
+            // walk over the remaining
             for (int i = 0; i < PersonNameIndex.Count; i++)
             {
+                if (i % 100 == 0) { Debug.WriteLine(i); }
+
+                int index = FirstFitOrNegative(adjacentCliques, cliques[i], k);
                 var thisClique = cliques[i];
-                var adjacent = new List<int>(thisClique);
 
-                for (int j = i + 1; j < PersonNameIndex.Count; j++)
+                if (index < 0)
                 {
-                    var nextClicque = cliques[j];
-
-                    if (thisClique.Intersect(nextClicque).Count() > (k - 1))
-                    {
-                        adjacent.AddRange(nextClicque);
-                    }
+                    adjacentCliques.Add(new List<List<int>>());
+                    adjacentCliques.Last().Add(thisClique);
                 }
-
-                adjacentCliques.Add(new List<int>(adjacent.Distinct()));
+                else
+                {
+                    adjacentCliques[index].Add(thisClique);
+                }
             }
 
-            return adjacentCliques;
+            var communities = new List<List<int>>();
+            foreach (var connected in adjacentCliques)
+            {
+                var thing = connected.SelectMany(x => x).Distinct().OrderBy(x => x);
+                communities.Add(thing.ToList());
+            }
+
+            int t = adjacentCliques.Sum(x => x.Count);
+
+            return communities;
         }
 
-        private List<List<int>> CalculateCliques()
+        private int FirstFitOrNegative(List<List<List<int>>> connectedCliques, List<int> clique, int k)
         {
-            List<List<int>> cliques = new List<List<int>>();
-
-            for (int v = 0; v < PersonNameIndex.Count; v++)
+            for (int i = 0; i < connectedCliques.Count; i++)
             {
-                var clique = new List<int>();
-                clique.Add(v);
-
-                var toBetried = new Stack<int>();
-                foreach (var u in Neighbours(v))
+                for (int j = 0; j < connectedCliques[i].Count; j++)
                 {
-                    toBetried.Push(u);
-                }
-
-
-                while (toBetried.Count > 0)
-                {
-                    var next = toBetried.Pop();
-
-                    if (IsNeighbourWithAll(clique, next))
+                    if (connectedCliques[i][j].Intersect(clique).Count() >= k)
                     {
-                        foreach (var neighbour in Neighbours(next))
-                        {
-                            toBetried.Push(neighbour);
-                        }
-                        clique.Add(next);
+                        return i;
                     }
                 }
+            }
 
-                cliques.Add(clique);
+            return -1;
+        }
+
+
+        private List<List<int>> CalculateClustersOrReadFromFile(int kcliqueness)
+        {
+            var cliques = new List<List<int>>();
+            if (System.IO.File.Exists(@"../../../cliques.txt"))
+            {
+                char[] splitChars = new char[] { ',' };
+                using (System.IO.StreamReader reader = new System.IO.StreamReader(@"../../../cliques.txt"))
+                {
+                    while (!reader.EndOfStream)
+                    {
+                        string str = reader.ReadLine();
+                        var splitted = str.Split(splitChars);
+                        var values = splitted
+                            .Select(c => int.Parse(c));
+                        cliques.Add(new List<int>(values));
+                    }
+                }
+            }
+            else
+            {
+                cliques = CalculateQliquesV2(kcliqueness);
             }
 
             return cliques;
@@ -178,14 +190,14 @@ namespace miniproject2
         {
             List<List<int>> cliques = new List<List<int>>();
             System.IO.File.Delete(@"../../../cliques.txt");
-            //System.IO.TextWriter writer = new System.IO.StreamWriter(@"../../../cliques.txt", true);
+            Stopwatch watch = new Stopwatch();
 
             for (int v = 0; v < PersonNameIndex.Count; v++)
             {
-                COUNTER = 0;
+                watch.Restart();
                 var clique = new List<int>();
                 clique.Add(v);
-                var toBetried = new Queue<int>(Neighbours(v));
+                var toBetried = new Queue<int>(NeighBours[v]);
 
 
                 while (toBetried.Count > 0)
@@ -199,16 +211,14 @@ namespace miniproject2
                     if (CanReachAllInkHops(next, clique, k))
                     {
                         clique.Add(next);
-                        foreach (var item in Neighbours(next))
+                        foreach (var item in NeighBours[next])
                         {
                             toBetried.Enqueue(item);
                         }
                     }
                 }
 
-                cliques.Add(clique);
-
-                Console.WriteLine("Clique " + v + " created, size: " + clique.Count);
+                Console.WriteLine("Clique " + v.ToString().PadLeft(4) + " created, size: " + clique.Count.ToString().PadLeft(3) + " Time: " + (int)watch.Elapsed.TotalSeconds);
                 var line = string.Join(",", clique);
                 //writer.WriteLine(line);
                 System.IO.File.AppendAllText(@"../../../cliques.txt", line + Environment.NewLine);
@@ -220,7 +230,7 @@ namespace miniproject2
 
         private bool IsNeighbourWithAll(IEnumerable<int> all, int v)
         {
-            var neighbours = Neighbours(v);
+            var neighbours = NeighBours[v];
 
             foreach (var u in all)
             {
@@ -233,10 +243,9 @@ namespace miniproject2
             return true;
         }
 
-        int COUNTER = 0;
         bool CanReachAllInkHops(int v, IEnumerable<int> all, int k)
         {
-            Debug.WriteLine("CANREACH: " + COUNTER++);
+            //Debug.WriteLine("CANREACH: " + COUNTER++);
             foreach (var u in all)
             {
                 int sp = ShortestPath(v, u, k);
@@ -246,7 +255,33 @@ namespace miniproject2
                 }
             }
 
+            //var canReach = RecursiveGetNeighbours(v, k).ToList();
+
+            //foreach (var any in all)
+            //{
+            //    if (!canReach.Contains(any))
+            //    {
+            //        return false;
+            //    }
+            //}
+
             return true;
+        }
+
+        private IEnumerable<int> RecursiveGetNeighbours(int v, int d)
+        {
+            var neighbours = NeighBours[v].AsEnumerable();
+            if (d >= 1)
+            {
+                foreach (var neigh in neighbours)
+                {
+                    neighbours = neighbours.Union(RecursiveGetNeighbours(v, d - 1));
+                }
+            }
+
+            neighbours = neighbours.Distinct();
+
+            return neighbours;
         }
 
         private int ShortestPath(int v, int u, int k)
@@ -257,7 +292,7 @@ namespace miniproject2
             }
 
             int depth = 1;
-            Queue<int> thisLevel = new Queue<int>(Neighbours(v));
+            Queue<int> thisLevel = new Queue<int>(NeighBours[v]);
             Queue<int> nextLevel = new Queue<int>();
 
             while (depth <= k)
@@ -271,7 +306,7 @@ namespace miniproject2
                     }
                     else
                     {
-                        foreach (var item in Neighbours(i))
+                        foreach (var item in NeighBours[i])
                         {
                             nextLevel.Enqueue(item);
                         }

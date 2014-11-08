@@ -10,12 +10,12 @@ namespace miniproject2
     {
         static void Main(string[] args)
         {
+            Clusterer clusterer = new Clusterer(@"../../../friendships.reviews.txt");
+            var clusters = clusterer.DoClustering(2, 2);
 
-            Clusterer cl = new Clusterer(@"../../../friendships.reviews.txt");
 
-            var clusters = cl.DoClustering(2, 2);
+            Console.WriteLine("done");
 
-            Console.WriteLine(clusters);
 
             Console.ReadKey();
         }

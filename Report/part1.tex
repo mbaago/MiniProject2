@@ -1,6 +1,7 @@
 \section{Community detection}
 
 \subsection{How did we detect communities}
+We took a simple route, of using k-plexes, with $k = 3$ (components where any vertex can reach any other vertex by walking at most three edges), using friendships as the edges, and implemented as k-cliques. We combined these semi-cliques, using the Clique Percolation Method, where two cliques get connected if they share $k - 1$ vertices, in this case 2. However, as CPM appears to assume proper cliques, this might not be optimal. \footnote{tilføj clique til \textit{alle} adjacent-cliques i kode?}
 
 
 \subsection{What were the results}

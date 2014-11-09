@@ -1,14 +1,13 @@
 \section{Community detection}
 
 \subsection{How did we detect communities}
-We took a simple route, of using k-plexes, with $k = 3$ (components where any vertex can reach any other vertex by walking at most three edges), using friendships as the edges, and implemented as k-cliques. We combined these semi-cliques, using the Clique Percolation Method, where two cliques get connected if they share $k - 1$ vertices, in this case 2. However, as CPM appears to assume proper cliques, this might not be optimal. \footnote{tilføj clique til \textit{alle} adjacent-cliques i kode?}
-
+We took a simple route, of using k-plexes, with $k = 3$ (components where any vertex can reach any other vertex by walking at most three edges), using friendships as the edges. We combined these semi-cliques, using the Clique Percolation Method, where two cliques get connected if they share $k - 1$ vertices, in this case 2. However, as CPM appears to assume proper cliques, this might not be optimal. It is also biased, in that a clique will only get connected to the first community where it shares $k - 1$ vertices.
 
 \subsection{What were the results}
-
+The result of the k-plex stage was a set of 4295 semi-cliques, with a average of around 40 members each. The result of the CPM stage was a set of 10 communities, one with around 4200 members, one with approximately 1100 members, two with around 650 members, and the remaining with less than 100 members. That there is one containing almost all potential buyers could indicate a fault in an earlier stage.
 
 \subsection{Choice of algorithm}
 
 
 \subsection{If we had more time}
-
+The first thing we could have looked at, would be a different similarity measure, e.g.\ two nodes get connected, if the Jaccard similarity of their friends are above a certain threshold. We could also have used a different means of clustering, e.g.\ group based using spectral clustering, or hierarchical using the Girvan-Newman method.

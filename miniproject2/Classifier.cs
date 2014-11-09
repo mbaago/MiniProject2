@@ -27,26 +27,60 @@ namespace miniproject2
 
 
 
-        public Dictionary<string, Tuple<double, bool>> clasify(List<Review> list)
+        //public Dictionary<string, Tuple<double, bool>> clasify(List<Review> list)
+        //{
+        public Dictionary<int, double> clasify(List<Review> list)
         {
+
+
+
             int tenth = list.Count / 10;
             List<Dictionary<string, Tuple<double, bool>>> result = new List<Dictionary<string,Tuple<double,bool>>>();
-            
+
+            Dictionary<int, double> accuracy = new Dictionary<int, double>();
 
             for (int i = 0; i < 10; i++)
             {
+                goodWords = new Dictionary<string, double>();
+                badWords = new Dictionary<string, double>();
+                wordProbability = new Dictionary<string, Tuple<double, double>>();
+
                 var firstLearnList = list.Take(i * tenth);
-                var testList = list.Skip(i * tenth).Take(tenth);
-                var learnList = list.Skip(tenth * (i + 1));
+                var testList = list.Take(tenth);
+                var secondLearnList = list.Skip(tenth * (i + 1));
 
-                calculateWordProbability(learnList.ToList());
+                //var testList = list.Take(tenth);
+                //var learnList = list.Skip(tenth);
 
+                List<Review> learnList = new List<Review>();
+                learnList.AddRange(firstLearnList.ToList());
+                learnList.AddRange(secondLearnList.ToList());
 
+                calculateWordProbability(learnList);
 
-                return rateReviews(testList.ToList(), learnList.Count());
+                int neutral = 0;
+                int correct = 0;
+
+                foreach (var item in rateReviews(testList.ToList(), learnList.Count()))
+                {
+                    if ((item.Value.Item1 == 3))
+                    {
+                        neutral++;
+                    }
+                    else if ((item.Value.Item1 > 3) == item.Value.Item2)
+                    {
+                        correct++;
+                    }
+                    else if ((item.Value.Item1 < 3) != item.Value.Item2)
+                    {
+                        correct++;
+                    }
+                }
+                accuracy.Add(i, ((double)correct / (testList.ToList().Count - neutral)) * 100);
+
             }
 
-            return null;
+            return accuracy;
            
         }
 
@@ -87,7 +121,6 @@ namespace miniproject2
         private void calculateWordProbability(List<Review> list)
         {
             countWords(list);
-
             foreach (var item in goodWords)
             {
                 wordProbability.Add(item.Key, new Tuple<double, double>(maxValue(1,(item.Value / list.Count)), 0));

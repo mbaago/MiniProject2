@@ -21,10 +21,37 @@ When classifying a review, several problems arise, such as:
 
 To handle this, we use Potts's sentiment aware tokenizer: \url{http://sentiment.christopherpotts.net/code-data/happyfuntokenizing.py}. Negations are handled by adding \texttt{\_NEG} to all words following the negations, until the first clause-level punctuation mark.
 
-
-
-% what did we do
-% corner cutting
+\subsubsection{Classification}
+The probability of a word appearing in a review is calculated for both good and bad review, based on the score of the review. To reduce the run time we calculated the probability of an empty non of the words appeared and the adjusted for the word in the review. Further more to increase performance the probability was only calculated for a word appearing and not both appearing and not appearing. This means we can only predict good or bad reviews not neutral. which could be an improvement.
 
 
 \subsection{How good is the classifier}
+To see how good the classifier is we ran cross-validation on the SentimentTrainingData.txt file, using 90\% of the review to learn and the last 10 \% to test on. And running the test 10 times, so that each review have been tested. The result of these teste are. To validate whether a review is correctly rated as either good or bad, a good review needs to be 4 or 5 and bad needs 1 or 2. A review with a score of 3 are still rated but it is not counted as either right and wrong.
+
+\begin{tabular}{|c|c|}
+\hline 
+Part & Accuracy of the tests \\ 
+\hline 
+1 & 77.67\% \\ 
+\hline 
+2 & 77.93\% \\ 
+\hline 
+3 & 78.00\% \\ 
+\hline 
+4 & 77.94\% \\ 
+\hline 
+5 & 77.96\% \\ 
+\hline 
+6 & 77.89\% \\ 
+\hline 
+7 & 77.88\% \\ 
+\hline 
+8 & 77.96\% \\ 
+\hline 
+9 & 77.89\% \\ 
+\hline 
+10 & 77.83\% \\ 
+\hline 
+\end{tabular} 
+
+This gives an average accuracy of 77.89%

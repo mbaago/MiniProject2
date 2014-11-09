@@ -19,16 +19,29 @@ When classifying a review, several problems arise, such as:
     \item Negations, especially when early in a sentence.
 \end{itemize}
 
-To handle this, we use Potts's sentiment aware tokenizer: \url{http://sentiment.christopherpotts.net/code-data/happyfuntokenizing.py}. Negations are handled by adding \texttt{\_NEG} to all words following the negations, until the first clause-level punctuation mark.
+To handle this, we use Potts's sentiment aware tokenizer: \url{http://sentiment.christopherpotts.net/code-data/happyfuntokenizing.py}. Negations are handled by adding \texttt{\_NEG} to all words following the negations, until the first clause-level punctuation mark. We do not handle the other items in the above list.
 
 \subsubsection{Classification}
+Bayes Theorem states that, for two random variables, we have
+\[
+    p(C \mid X) = \frac{p(X \mid C) p(C)}{p(X)}
+\]
+Which gives us that the score $c \in C$ given review review $x$ is
+\[
+    score(x, c) = p(c \mid x) = p(x \mid c)p(c)
+\]
+with the denominator removed, as $p(x)$ is the same for all $c$.
+\\
+We use a naive Bayes Classifier, that is, we assume that the features in $X$ are independent.
+
 The probability of a word appearing in a review is calculated for both good and bad reviews, based on the score of the review. To reduce the run time, we calculated the probability of an empty review, where none of the words appeared, and then adjusted for the words in the review. To further increase performance, the probability was only calculated for a word appearing and not both appearing and not appearing. This means we can only predict good or bad reviews, not neutral, giving room for improvement.
 
 
 \subsection{How good is the classifier}
-To see how good the classifier is, we ran cross-validation on the SentimentTrainingData.txt file, using 90\% of the review to learn and the last 10 \% to test on. And running the test 10 times, so that each review have been tested. The result of these tests are shown in table \ref{tab:classifier-accuracy}, and averages to 77.89\%. To validate whether a review is correctly rated as either good or bad, a good review needs to be 4 or 5 and bad needs 1 or 2. A review with a score of 3 are still rated but it is not counted as either right and wrong.
+To see how good the classifier is, we ran cross-validation on the SentimentTrainingData.txt file, using 90\% of the review to learn and the last 10 \% to test on. And running the test 10 times, so that each review have been tested. The result of these tests are shown in table \ref{tab:classifier-accuracy}, and averages to 77.89\%. To validate whether a review is correctly rated as either good or bad, a good review needs to be 4 or 5 and bad needs 1 or 2. A review with a score of 3 is still rated, but it is not counted as either right and wrong.
 
-\begin{table}
+\begin{table}[h]
+    \centering
     \begin{tabular}{|c|c|}
         \hline 
         Part & Accuracy of the tests \\ 

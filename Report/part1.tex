@@ -7,7 +7,7 @@ We took a simple route, of using k-plexes, with $k = 3$ (components where any ve
 The result of the k-plex stage was a set of 4295 semi-cliques, with a average of around 40 members each. The result of the CPM stage was a set of 10 communities, one with around 4200 members, one with approximately 1100 members, two with around 650 members, and the remaining with less than 100 members. That there is one containing almost all potential buyers could indicate a fault in an earlier stage.
 
 \subsection{Choice of algorithm}
-
+We used CPM as it was quite easy to implement, and 3-cliques as it was easy to determine if a node should be added using BFS.
 
 \subsection{If we had more time}
 The first thing we could have looked at, would be a different similarity measure, e.g.\ two nodes get connected, if the Jaccard similarity of their friends are above a certain threshold. We could also have used a different means of clustering, e.g.\ group based using spectral clustering, or hierarchical using the Girvan-Newman method.

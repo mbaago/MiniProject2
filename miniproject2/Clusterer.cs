@@ -9,17 +9,22 @@ namespace miniproject2
 {
     public class Clusterer
     {
-        public Clusterer(string fileName)
+        public Clusterer(string peopleFile, string cliquesFile, string clustersFile)
         {
             PersonNameIndex = new Dictionary<string, int>();
             People = new List<Person>();
             NeighBours = new Dictionary<int, List<int>>();
 
-            LoadPeople(fileName);
+            LoadPeople(peopleFile);
             LoadNamesToIndex();
             LoadGraphArray();
+
+            CLiquesFile = cliquesFile;
+            ClustersFile = clustersFile;
         }
 
+        private string CLiquesFile { get; set; }
+        private string ClustersFile { get; set; }
         private List<Person> People { get; set; }
         private Dictionary<string, int> PersonNameIndex { get; set; }
         public double[,] GraphArray { get; private set; }
@@ -102,14 +107,26 @@ namespace miniproject2
             // Use CPM
             // Little different from slides
             // We use another value of k for the clique graph
-            var CPM = CliquePercolationMethod(cliquesOfSize, k);
+            var CPM = CPMOrReadFromFile(cliquesOfSize, k);
 
             return CPM;
         }
 
+        private List<List<int>> CPMOrReadFromFile(List<List<int>> cliques, int k)
+        {
+            if (System.IO.File.Exists(ClustersFile))
+            {
+                return ReadListOfCliquesOrClusters(ClustersFile);
+            }
+            else
+            {
+                return CliquePercolationMethod(cliques, k);
+            }
+        }
 
         private List<List<int>> CliquePercolationMethod(List<List<int>> cliques, int k)
         {
+            System.IO.File.Delete(ClustersFile);
             var adjacentCliques = new List<List<List<int>>>();
 
             // walk over the remaining
@@ -117,9 +134,26 @@ namespace miniproject2
             {
                 if (i % 100 == 0) { Debug.WriteLine(i); }
 
-                int index = FirstFitOrNegative(adjacentCliques, cliques[i], k);
                 var thisClique = cliques[i];
 
+                // add to all? seems to add to literally all
+                //var indexes = AllFitsOrEmpty(adjacentCliques, thisClique, k-1);
+
+                //if (indexes.Count == 0)
+                //{
+                //    adjacentCliques.Add(new List<List<int>>());
+                //    adjacentCliques.Last().Add(thisClique);
+                //}
+                //else
+                //{
+                //    foreach (var index in indexes)
+                //    {
+                //        adjacentCliques[index].Add(thisClique);
+                //    }
+                //}
+
+                // add to first fit
+                int index = FirstFitOrNegative(adjacentCliques, thisClique, k);
                 if (index < 0)
                 {
                     adjacentCliques.Add(new List<List<int>>());
@@ -138,8 +172,33 @@ namespace miniproject2
                 communities.Add(thing.ToList());
             }
 
+            foreach (var community in communities)
+            {
+                var line = string.Join(",", community);
+                System.IO.File.AppendAllText(ClustersFile, line + Environment.NewLine);
+            }
+
             // one person might be shared in communites
             return communities;
+        }
+
+        private List<int> AllFitsOrEmpty(List<List<List<int>>> connectedCliques, List<int> clique, int k)
+        {
+            var result = new List<int>();
+
+            for (int i = 0; i < connectedCliques.Count; i++)
+            {
+                for (int j = 0; j < connectedCliques[i].Count; j++)
+                {
+                    if (connectedCliques[i][j].Intersect(clique).Count() >= k)
+                    {
+                        result.Add(i);
+                        break;
+                    }
+                }
+            }
+
+            return result;
         }
 
         private int FirstFitOrNegative(List<List<List<int>>> connectedCliques, List<int> clique, int k)
@@ -161,34 +220,40 @@ namespace miniproject2
 
         private List<List<int>> CalculateClustersOrReadFromFile(int kcliqueness)
         {
-            var cliques = new List<List<int>>();
-            if (System.IO.File.Exists(@"../../../cliques.txt"))
+            if (System.IO.File.Exists(CLiquesFile))
             {
-                char[] splitChars = new char[] { ',' };
-                using (System.IO.StreamReader reader = new System.IO.StreamReader(@"../../../cliques.txt"))
-                {
-                    while (!reader.EndOfStream)
-                    {
-                        string str = reader.ReadLine();
-                        var splitted = str.Split(splitChars);
-                        var values = splitted
-                            .Select(c => int.Parse(c));
-                        cliques.Add(new List<int>(values));
-                    }
-                }
+                return ReadListOfCliquesOrClusters(CLiquesFile);
             }
             else
             {
-                cliques = CalculateQliquesV2(kcliqueness);
+                return CalculateQliquesV2(kcliqueness);
+            }
+        }
+
+        private List<List<int>> ReadListOfCliquesOrClusters(string file)
+        {
+            var values = new List<List<int>>();
+
+            char[] splitChars = new char[] { ',' };
+            using (System.IO.StreamReader reader = new System.IO.StreamReader(file))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string str = reader.ReadLine();
+                    var splitted = str.Split(splitChars);
+                    var read = splitted
+                        .Select(c => int.Parse(c));
+                    values.Add(new List<int>(read));
+                }
             }
 
-            return cliques;
+            return values;
         }
 
         private List<List<int>> CalculateQliquesV2(int k)
         {
             List<List<int>> cliques = new List<List<int>>();
-            System.IO.File.Delete(@"../../../cliques.txt");
+            System.IO.File.Delete(CLiquesFile);
             Stopwatch watch = new Stopwatch();
 
             for (int v = 0; v < PersonNameIndex.Count; v++)
@@ -220,7 +285,7 @@ namespace miniproject2
                 Console.WriteLine("Clique " + v.ToString().PadLeft(4) + " created, size: " + clique.Count.ToString().PadLeft(3) + " Time: " + (int)watch.Elapsed.TotalSeconds);
                 var line = string.Join(",", clique);
                 //writer.WriteLine(line);
-                System.IO.File.AppendAllText(@"../../../cliques.txt", line + Environment.NewLine);
+                System.IO.File.AppendAllText(CLiquesFile, line + Environment.NewLine);
             }
 
             return cliques;

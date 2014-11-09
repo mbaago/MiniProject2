@@ -10,7 +10,7 @@ namespace miniproject2
     {
         static void Main(string[] args)
         {
-            Clusterer clusterer = new Clusterer(@"../../../friendships.reviews.txt");
+            Clusterer clusterer = new Clusterer(@"../../../friendships.reviews.txt", @"../../../cliques.txt", @"../../../clusters.txt");
             var clusters = clusterer.DoClustering(2, 2);
 
 

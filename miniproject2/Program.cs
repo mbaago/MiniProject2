@@ -29,7 +29,7 @@ namespace miniproject2
         private static void runClasifier()
         {
             DateTime start = DateTime.Now;
-            var list = txtParser.Instance.parseReview("SentimentTrainingData.txt", 0);
+            var list = txtParser.Instance.parseReview("SentimentTrainingData.txt", 10000);
             Classifier c = new Classifier();
 
             var result = c.clasify(list);

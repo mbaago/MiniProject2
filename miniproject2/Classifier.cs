@@ -16,6 +16,8 @@ namespace miniproject2
         public int negativeReviews { get; set; }
         public double propGood { get; set; }
         public double propNeg{ get; set; }
+        private double emptyGood;
+        private double emptyBad;
 
         public Classifier()
         {
@@ -29,6 +31,15 @@ namespace miniproject2
 
         //public Dictionary<string, Tuple<double, bool>> clasify(List<Review> list)
         //{
+
+
+        public void learn(List<Review> list)
+        {
+            goodWords = new Dictionary<string, double>();
+            badWords = new Dictionary<string, double>();
+            wordProbability = new Dictionary<string, Tuple<double, double>>();
+            calculateWordProbability(list);
+        }
         public Dictionary<int, double> clasify(List<Review> list)
         {
 
@@ -156,20 +167,20 @@ namespace miniproject2
 
         private Dictionary<string, Tuple<double, bool>> rateReviews(List<Review> list, int total)
         {
-            double emptyGood = calculateGoodEmpty(list.Count, total);
-            double emptyBad = calculateBadEmpty(list.Count, total);
+            calculateGoodEmpty(list.Count, total);
+            calculateBadEmpty(list.Count, total);
             var result = new Dictionary<string, Tuple<double, bool>>();
 
             foreach (var item in list)
             {
-                result[item.productID + item.userID] = new Tuple<double,bool>(item.score, reteReview(item, emptyGood, emptyBad));
+                result[item.productID + item.userID] = new Tuple<double,bool>(item.score, reteReview(item));
             }
 
 
             return result;
         }
 
-        private bool reteReview(Review item, double emptyGood, double emptyBad)
+        private bool reteReview(Review item)
         {
             double propGood = 1;
             double propBad = 1;
@@ -191,7 +202,7 @@ namespace miniproject2
 
         }
 
-        private double calculateGoodEmpty(int good, int total)
+        private void calculateGoodEmpty(int good, int total)
         {
             double result = 1;
             foreach (var item in wordProbability)
@@ -199,17 +210,17 @@ namespace miniproject2
                 result = result * (1 - item.Value.Item1);
             }
             result *= ((double)good/total);
-            return result;
+            emptyGood = result;
         }
 
-        private double calculateBadEmpty(int neg, int total)
+        private void calculateBadEmpty(int neg, int total)
         {
             double result = 1;
             foreach (var item in wordProbability)
             {
                 result = result * (1 - item.Value.Item2);
             }
-            return result * ((double)neg / total);
+            emptyBad = result * ((double)neg / total);
         }
 
 

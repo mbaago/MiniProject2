@@ -11,7 +11,14 @@ namespace miniproject2
         static void Main(string[] args)
         {
             //Clustering();
-            runClasifier();
+            //runClasifier();
+            parsetxt();
+        }
+
+        private static void parsetxt()
+        {
+            txtParser parser = new txtParser();
+            parser.parseTxt("friendships.reviews.txt");
         }
 
         private static void Clustering()

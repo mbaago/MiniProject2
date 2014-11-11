@@ -23,7 +23,7 @@ namespace miniproject2
 
         public List<Person> parseTxt(string file)
         {
-            FileInfo fi = new FileInfo(file);
+            FileInfo fi = new FileInfo("../../../" + file);
             StreamReader reader = fi.OpenText();
             string[] lines = new string[5];
             List<Person> persons = new List<Person>();
@@ -52,6 +52,8 @@ namespace miniproject2
             {
                 p.friends.Add(friends[i]);
             }
+
+            p.review = person[3].Substring(person[3].IndexOf(':') + 1);
 
             return p;
         }

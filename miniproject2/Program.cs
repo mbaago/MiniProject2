@@ -12,7 +12,8 @@ namespace miniproject2
         {
             //Clustering();
             //runClasifier();
-            parsetxt();
+            //parsetxt();
+            learn("SentimentTrainingData.txt");
         }
 
         private static void parsetxt()
@@ -31,6 +32,13 @@ namespace miniproject2
 
 
             Console.ReadKey();
+        }
+
+        private static void learn(string file)
+        {
+            var list = txtParser.Instance.parseReview(file, 100);
+            Classifier c = new Classifier();
+            c.learn(list);
         }
 
         private static void runClasifier()

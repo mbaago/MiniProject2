@@ -53,10 +53,12 @@ namespace miniproject2
                 p.friends.Add(friends[i]);
             }
 
-            p.review = person[3].Substring(person[3].IndexOf(':') + 1);
+            p.review = person[3].Substring(person[3].IndexOf(':') + 2);
 
             return p;
         }
+
+        
 
         public List<Review> parseReview(string file, int count)
         {

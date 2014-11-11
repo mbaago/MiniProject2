@@ -18,6 +18,7 @@ namespace miniproject2
         public double propNeg{ get; set; }
         private double emptyGood;
         private double emptyBad;
+        private string learnFile = "wordProbList.txt";
 
         public Classifier()
         {
@@ -35,11 +36,40 @@ namespace miniproject2
 
         public void learn(List<Review> list)
         {
-            goodWords = new Dictionary<string, double>();
-            badWords = new Dictionary<string, double>();
-            wordProbability = new Dictionary<string, Tuple<double, double>>();
-            calculateWordProbability(list);
+            if (System.IO.File.Exists(learnFile))
+            {
+                readListFromFile(learnFile);
+            }
+            else
+            {
+                goodWords = new Dictionary<string, double>();
+                badWords = new Dictionary<string, double>();
+                wordProbability = new Dictionary<string, Tuple<double, double>>();
+                calculateWordProbability(list);
+            }
+            
         }
+
+
+
+        private void readListFromFile(string learnFile)
+        {
+            wordProbability = new Dictionary<string, Tuple<double, double>>();
+
+            char[] splitChars = new char[] { '\t' };
+            using (System.IO.StreamReader reader = new System.IO.StreamReader(learnFile))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string str = reader.ReadLine();
+                    var splitted = str.Split(splitChars);
+                    wordProbability.Add(splitted[0],
+                        new Tuple<double, double>(double.Parse(splitted[1]),
+                            double.Parse(splitted[2])));
+                }
+            }
+        }
+
         public Dictionary<int, double> clasify(List<Review> list)
         {
 
@@ -144,15 +174,24 @@ namespace miniproject2
                     wordProbability[item.Key] = new Tuple<double, double>(posValue,  maxValue(1,(item.Value / list.Count)));
                 }
             }
-            var temp = new Dictionary<string, Tuple<double, double>>();
-            //foreach (var item in wordProbability)
-            //{
-            //    double posValues = Math.Log10(positiveReviews) + item.Value.Item1;
-            //    double negVAlue = Math.Log10(negativeReviews) + item.Value.Item2;
-            //    temp[item.Key] = new Tuple<double, double>(posValues, negVAlue);
-            //}
+            saveWordProbToFile();
 
-            //wordProbability = temp;
+        }
+
+        private void saveWordProbToFile()
+        {
+            using (System.IO.StreamWriter writer = new System.IO.StreamWriter(learnFile))
+            {
+                foreach (var item in wordProbability)
+                {
+                    string line = item.Key;
+                    line += "\t" + item.Value.Item1.ToString();
+                    line += "\t" + item.Value.Item2.ToString();
+
+                    writer.WriteLine(line);
+                }
+            }
+
         }
 
         private double maxValue(int p1, double p2)

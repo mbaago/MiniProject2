@@ -11,9 +11,20 @@ namespace miniproject2
         static void Main(string[] args)
         {
             //Clustering();
-            //runClasifier();
+            //Classifier classifier = runClasifier();
             //parsetxt();
-            learn("SentimentTrainingData.txt", 0);
+
+            var classifier = learn("SentimentTrainingData.txt", 0);
+
+            Clusterer clusterer = new Clusterer(@"friendships.reviews.txt", @"../../../cliques.txt", @"../../../clusters.txt");
+            var clusters = clusterer.DoClustering(2, 2);
+
+            var det = new DetermineIfLikelyToBuy(clusterer, classifier, clusters);
+
+            var res = det.WillUsersBuy();
+
+            //learn("SentimentTrainingData.txt", 0);
+
         }
 
         private static void parsetxt()
@@ -34,11 +45,13 @@ namespace miniproject2
             Console.ReadKey();
         }
 
-        private static void learn(string file, int n)
+        private static Classifier learn(string file, int n)
         {
             var list = txtParser.Instance.parseReview(file, n);
             Classifier c = new Classifier();
             c.learn(list);
+
+            return c;
         }
 
         private static void runClasifier()

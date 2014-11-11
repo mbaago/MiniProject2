@@ -8,22 +8,22 @@ namespace miniproject2
 {
     class DetermineIfLikelyToBuy
     {
-        public DetermineIfLikelyToBuy(Clusterer clusterMachine, Classifier classifier, List<List<int>> communities, List<int> userIndexes, List<string> userNames)
+        public DetermineIfLikelyToBuy(Clusterer clusterMachine, Classifier classifier, List<List<int>> communities)
         {
             ClusterMachine = clusterMachine;
             ClassifierMachine = classifier;
             Communities = communities;
-            UserIndexes = userIndexes;
+            //UserIndexes = userIndexes;
             //UserNames = userNames;
 
             UserNames = ClusterMachine.People.Select(p => p.name).ToList();
-            Persons = txtParser.Instance.parseTxt(@"../../../friendships.reviews.txt");
+            Persons = txtParser.Instance.parseTxt(@"friendships.reviews.txt");
         }
 
         private Clusterer ClusterMachine { get; set; }
         private Classifier ClassifierMachine { get; set; }
         private List<List<int>> Communities { get; set; }
-        private List<int> UserIndexes { get; set; }
+        //private List<int> UserIndexes { get; set; }
         private List<string> UserNames { get; set; }
         private List<Person> Persons { get; set; }
 
@@ -45,9 +45,16 @@ namespace miniproject2
             return val ? "5" : "1";
         }
 
+        public string BoolToYesOrNo(bool val)
+        {
+            return val ? "yes" : "no";
+        }
+
         public List<Tuple<string, string, string>> WillUsersBuy()
         {
-            // classifier.learn
+            //var list = txtParser.Instance.parseReview("SentimentTrainingData.txt", 0);
+            //Classifier c = new Classifier();
+            //c.learn(list);
 
             var result = new List<Tuple<string, string, string>>();
 
@@ -61,6 +68,8 @@ namespace miniproject2
                 {
                     // spørg venner!
                     bool IsRecommended = IsRecommendedFromFriends(userID, communityIndex);
+                    var res = new Tuple<string, string, string>(review.name, "*", BoolToYesOrNo(IsRecommended));
+                    result.Add(res);
                 }
                 else // has bought
                 {
@@ -82,6 +91,12 @@ namespace miniproject2
             foreach (var friend in friends)
             {
                 var friendReview = GetReviewFromName(UserNames[friend]);
+
+                if (friendReview.review == "*")
+                {
+                    continue;
+                }
+
                 var sentBool = ClassifierMachine.reteReview(friendReview);
                 var friendCommunity = GetCommunityIndex(friend);
 

@@ -25,8 +25,8 @@ namespace miniproject2
 
         private string CLiquesFile { get; set; }
         private string ClustersFile { get; set; }
-        private List<Person> People { get; set; }
-        private Dictionary<string, int> PersonNameIndex { get; set; }
+        public List<Person> People { get; set; }
+        public Dictionary<string, int> PersonNameIndex { get; set; }
         public double[,] GraphArray { get; private set; }
         public bool[,] BoolGraphArray { get; private set; }
         public Dictionary<int, List<int>> NeighBours { get; set; }

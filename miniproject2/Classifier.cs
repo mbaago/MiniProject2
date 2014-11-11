@@ -219,7 +219,7 @@ namespace miniproject2
             return result;
         }
 
-        private bool reteReview(Review item)
+        public bool reteReview(Review item)
         {
             double propGood = 1;
             double propBad = 1;

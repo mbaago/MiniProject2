@@ -8,44 +8,107 @@ namespace miniproject2
 {
     class DetermineIfLikelyToBuy
     {
-        public DetermineIfLikelyToBuy(Clusterer clusterMachine, List<List<int>> communities, List<int> userIndexes, List<string> userNames, List<Review> reviews)
+        public DetermineIfLikelyToBuy(Clusterer clusterMachine, Classifier classifier, List<List<int>> communities, List<int> userIndexes, List<string> userNames)
         {
             ClusterMachine = clusterMachine;
+            ClassifierMachine = classifier;
             Communities = communities;
             UserIndexes = userIndexes;
-            UserNames = userNames;
-            Reviews = reviews;
+            //UserNames = userNames;
+
+            UserNames = ClusterMachine.People.Select(p => p.name).ToList();
+            Persons = txtParser.Instance.parseTxt(@"../../../friendships.reviews.txt");
         }
 
         private Clusterer ClusterMachine { get; set; }
+        private Classifier ClassifierMachine { get; set; }
         private List<List<int>> Communities { get; set; }
         private List<int> UserIndexes { get; set; }
         private List<string> UserNames { get; set; }
-        private List<Review> Reviews { get; set; }
+        private List<Person> Persons { get; set; }
 
-        public List<Tuple<string, int, string>> WillUsersBuy()
+        private int GetCommunityIndex(int userID)
         {
-            var result = new List<Tuple<string, int, string>>();
-            foreach (var index in UserIndexes)
+            for (int i = 0; i < Communities.Count; i++)
             {
-                // has bought?
-                // calc sentiment
-
-                // else
-                // calc sentiment
-                // answer: likely to buy?
-                var neighbours = ClusterMachine.NeighBours[index];
-                foreach (var neighbour in neighbours)
+                if (Communities[i].Contains(userID))
                 {
-                    // har nabo reviewet? fortsæt
-                    // er nabo i ANDET community? * 10
-                    // er nabo kyle? * 10
-                    // summer op
-                    // divider med antal?
+                    return i;
+                }
+            }
+
+            throw new Exception();
+        }
+
+        public string BoolToOneOrFive(bool val)
+        {
+            return val ? "5" : "1";
+        }
+
+        public List<Tuple<string, string, string>> WillUsersBuy()
+        {
+            // classifier.learn
+
+            var result = new List<Tuple<string, string, string>>();
+
+            foreach (var review in Persons)
+            {
+                var userID = ClusterMachine.PersonNameIndex[review.name];
+                int communityIndex = GetCommunityIndex(userID);
+
+                // has not bought
+                if (review.review != "*")
+                {
+                    // spørg venner!
+                    bool IsRecommended = IsRecommendedFromFriends(userID, communityIndex);
+                }
+                else // has bought
+                {
+                    var sentBool = ClassifierMachine.reteReview(GetReviewFromString(review.review));
+
+                    var res = new Tuple<string, string, string>(review.name, BoolToOneOrFive(sentBool), "*");
+                    result.Add(res);
                 }
             }
 
             return result;
+        }
+
+        private bool IsRecommendedFromFriends(int userID, int communityIndex)
+        {
+            int friendSentiments = 0;
+            var friends = ClusterMachine.NeighBours[userID];
+
+            foreach (var friend in friends)
+            {
+                var friendReview = GetReviewFromName(UserNames[friend]);
+                var sentBool = ClassifierMachine.reteReview(friendReview);
+                var friendCommunity = GetCommunityIndex(friend);
+
+                if (sentBool)
+                {
+                    friendSentiments += (communityIndex != friendCommunity || UserNames[friend] == "kyle" ? 10 : 1);
+                }
+                else
+                {
+                    friendSentiments -= (communityIndex != friendCommunity || UserNames[friend] == "kyle" ? 10 : 1);
+                }
+            }
+
+            return friendSentiments > 0;
+        }
+
+        private Review GetReviewFromString(string str)
+        {
+            return new Review() { review = str };
+        }
+
+        private Review GetReviewFromName(string name)
+        {
+            return Persons
+                .Where(p => p.name == name)
+                .Select(p => GetReviewFromString(p.review))
+                .First();
         }
     }
 }

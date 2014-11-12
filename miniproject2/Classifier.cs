@@ -36,6 +36,10 @@ namespace miniproject2
 
         public void learn(List<Review> list)
         {
+            //calculateWordProbability(list);
+            calculateGoodEmpty(list.Count, list.Count);
+            calculateBadEmpty(list.Count, list.Count);
+
             if (System.IO.File.Exists(learnFile))
             {
                 readListFromFile(learnFile);

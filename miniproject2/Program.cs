@@ -23,6 +23,20 @@ namespace miniproject2
 
             var res = det.WillUsersBuy();
 
+            if (System.IO.File.Exists(@"../../../result.txt"))
+            {
+                System.IO.File.Delete(@"../../../result.txt");
+            }
+
+            using (System.IO.StreamWriter writer = new System.IO.StreamWriter(@"../../../result.txt"))
+            {
+                foreach (var item in res)
+                {
+                    string it = item.Item1 + "\t" + item.Item2 + "\t" + item.Item3;
+                    writer.WriteLine(it);
+                }
+            }
+
             //learn("SentimentTrainingData.txt", 0);
 
         }

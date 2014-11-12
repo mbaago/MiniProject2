@@ -64,7 +64,7 @@ namespace miniproject2
                 int communityIndex = GetCommunityIndex(userID);
 
                 // has not bought
-                if (review.review != "*")
+                if (review.review == "*")
                 {
                     // spørg venner!
                     bool IsRecommended = IsRecommendedFromFriends(userID, communityIndex);
@@ -102,6 +102,7 @@ namespace miniproject2
 
                 if (sentBool)
                 {
+                    //friendSentiments++;
                     friendSentiments += (communityIndex != friendCommunity || UserNames[friend] == "kyle" ? 10 : 1);
                 }
                 else
